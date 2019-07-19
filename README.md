@@ -22,3 +22,11 @@ where action is one of:
  * `--erase-all`
  * `--flash`
  * `--flash-softdevice`
+ * `--flash-bootloader-bin`
+
+This script has been modified specifically to un-bork Particle Mesh boards. Instructions to un-bork are the following:
+
+1. Run `./nrfjprog.sh --flash-softdevice /path/to/s140_nrf52_6.0.0_softdevice.hex`
+1. Then, run `./nrfjprog.sh --flash-bootloader-bin /path/to/xenon-bootloader@1.3.0-rc.1.bin 0xf4000`
+
+As of this writing, the latest firmware is `xenon-bootloader@1.3.0-rc.1.bin` and the boot loader start location is `0xf4000`. This parameter **may change** in future revisions.

@@ -99,6 +99,7 @@ elif [ "$1" = "--flash-bootloader-bin" ]; then
     echo "w4 4001e504 1" >> $TMPSCRIPT
     echo "loadfile $FILE $ADDR" >> $TMPSCRIPT
     echo "r" >> $TMPSCRIPT
+    echo "h" >> $TMPSCRIPT
     echo "w4 4001e504 2" >> $TMPSCRIPT
     echo "w4 4001e514 1" >> $TMPSCRIPT
     echo "w4 4001e504 1" >> $TMPSCRIPT
