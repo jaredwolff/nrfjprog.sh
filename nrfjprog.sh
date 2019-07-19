@@ -8,7 +8,7 @@ which relies on JLinkExe to interface with the JLink hardware.
 
 usage:
 
-nrfjprog.sh <action> [hexfile]
+nrfjprog.sh <action> [filename] [address]
 
 where action is one of
   --info
@@ -16,6 +16,7 @@ where action is one of
   --pin-reset
   --erase-all
   --flash
+  --flash-bootloader-bin
   --flash-softdevice
   --rtt
   --gdbserver
@@ -31,7 +32,8 @@ TOOLCHAIN_PREFIX=arm-none-eabi
 TOOLCHAIN_PATH=
 JLINK_OPTIONS="-device nRF52 -if SWD -speed 4000"
 
-HEX=$2
+FILE=$2
+ADDR=$3
 
 JLINK="JLinkExe $JLINK_OPTIONS"
 JLINKGDBSERVER="JLinkGDBServer $JLINK_OPTIONS"
@@ -78,11 +80,30 @@ elif [ "$1" = "--erase-all" ]; then
     rm $TMPSCRIPT
 elif [ "$1" = "--flash" ]; then
     echo ""
-    echo -e "${STATUS_COLOR}flashing ${HEX}...${RESET}"
+    echo -e "${STATUS_COLOR}flashing ${FILE}...${RESET}"
     echo ""
     echo "r" > $TMPSCRIPT
     echo "h" >> $TMPSCRIPT
-    echo "loadfile $HEX" >> $TMPSCRIPT
+    echo "loadfile $FILE" >> $TMPSCRIPT
+    echo "r" >> $TMPSCRIPT
+    echo "g" >> $TMPSCRIPT
+    echo "exit" >> $TMPSCRIPT
+    $JLINK $TMPSCRIPT
+    rm $TMPSCRIPT
+elif [ "$1" = "--flash-bootloader-bin" ]; then
+    echo ""
+    echo -e "${STATUS_COLOR}flashing ${FILE} ${ADDR}...${RESET}"
+    echo ""
+    echo "r" > $TMPSCRIPT
+    echo "h" >> $TMPSCRIPT
+    echo "w4 4001e504 1" >> $TMPSCRIPT
+    echo "loadfile $FILE $ADDR" >> $TMPSCRIPT
+    echo "r" >> $TMPSCRIPT
+    echo "w4 4001e504 2" >> $TMPSCRIPT
+    echo "w4 4001e514 1" >> $TMPSCRIPT
+    echo "w4 4001e504 1" >> $TMPSCRIPT
+    echo "w4 10001014 $ADDR" >> $TMPSCRIPT
+    echo "w4 4001e504 0" >> $TMPSCRIPT
     echo "r" >> $TMPSCRIPT
     echo "g" >> $TMPSCRIPT
     echo "exit" >> $TMPSCRIPT
@@ -90,7 +111,7 @@ elif [ "$1" = "--flash" ]; then
     rm $TMPSCRIPT
 elif [ "$1" = "--flash-softdevice" ]; then
     echo ""
-    echo -e "${STATUS_COLOR}flashing softdevice ${HEX}...${RESET}"
+    echo -e "${STATUS_COLOR}flashing softdevice ${FILE}...${RESET}"
     echo ""
     # Halt, write to NVMC to enable erase, do erase all, wait for completion. reset
     echo "h"  > $TMPSCRIPT
@@ -101,7 +122,7 @@ elif [ "$1" = "--flash-softdevice" ]; then
     # Halt, write to NVMC to enable write. Write mainpart, write UICR. Assumes device is erased.
     echo "h" >> $TMPSCRIPT
     echo "w4 4001e504 1" >> $TMPSCRIPT
-    echo "loadfile $HEX" >> $TMPSCRIPT
+    echo "loadfile $FILE" >> $TMPSCRIPT
     echo "r" >> $TMPSCRIPT
     echo "g" >> $TMPSCRIPT
     echo "exit" >> $TMPSCRIPT
