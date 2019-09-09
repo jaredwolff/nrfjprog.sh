@@ -23,6 +23,8 @@ where action is one of:
  * `--flash`
  * `--flash-softdevice`
  * `--flash-bootloader-bin`
+ 
+## Un-bricking Particle Mesh Boards
 
 This script has been modified specifically to un-bork Particle Mesh boards. Instructions to un-bork are the following:
 
