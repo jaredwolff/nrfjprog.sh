@@ -18,6 +18,7 @@ where action is one of
   --flash
   --flash-bootloader-bin
   --flash-softdevice
+  --flash-softdevice-bin
   --rtt
   --gdbserver
 
@@ -110,7 +111,7 @@ elif [ "$1" = "--flash-bootloader-bin" ]; then
     echo "exit" >> $TMPSCRIPT
     $JLINK $TMPSCRIPT
     rm $TMPSCRIPT
-elif [ "$1" = "--flash-softdevice" ]; then
+elif [ "$1" = "--flash-softdevice" ] || [ "$1" = "--flash-softdevice-bin" ]; then
     echo ""
     echo -e "${STATUS_COLOR}flashing softdevice ${FILE}...${RESET}"
     echo ""
@@ -123,7 +124,11 @@ elif [ "$1" = "--flash-softdevice" ]; then
     # Halt, write to NVMC to enable write. Write mainpart, write UICR. Assumes device is erased.
     echo "h" >> $TMPSCRIPT
     echo "w4 4001e504 1" >> $TMPSCRIPT
-    echo "loadfile $FILE" >> $TMPSCRIPT
+    if  [ "$1" = "--flash-softdevice-bin" ]; then
+        echo "loadfile $FILE $ADDR" >> $TMPSCRIPT
+    else
+        echo "loadfile $FILE" >> $TMPSCRIPT
+    fi
     echo "r" >> $TMPSCRIPT
     echo "g" >> $TMPSCRIPT
     echo "exit" >> $TMPSCRIPT
